@@ -1,31 +1,44 @@
 import React from 'react';
-import { FiSearch } from 'react-icons/fi';
 import './styles/styles.css';
+import api from './services/api'
+import Header from './components/Header';
+import SearchForm from './components/SearchForm';
+import AddressDetails from './components/AddressDetails';
 
 const App = () => {
+  const [input, setInput] = React.useState('');
+  const [cep, setCep] = React.useState({});
+
+  async function handleSearch() {
+    if (input === '') {
+      alert('Preencha o campo com um CEP');
+      return;
+    }
+
+    try {
+      const response = await api.get(`${input}/json`);
+      setCep(response.data);
+      setInput('');
+    } catch {
+      alert('Erro ao buscar o CEP. Tente novamente!');
+      setInput('');
+    }
+  }
+
+  function handleKeyDown(event) {
+    event.key === "Enter" && handleSearch()
+  }
+
   return (
     <div className='container'>
-      <h1 className='title'>CEP Search</h1>
-
-      <div className='containerInput'>
-        <input
-          type="text"
-          placeholder="Digite seu cep..."
-        />
-
-        <button className="buttonSearch">
-          <FiSearch size={25} color="#FFF" />
-        </button>
-      </div>
-      <main className="main">
-        <h2>CEP: 79003222</h2>
-
-        <span>Rua </span>
-        <span>Complemento: </span>
-        <span>Sertão do Maruim</span>
-        <span>São José - SC</span>
-      </main>
-
+      <Header />
+      <SearchForm
+        input={input}
+        setInput={setInput}
+        handleSearch={handleSearch}
+        handleKeyDown={handleKeyDown}
+      />
+      <AddressDetails cep={cep} />
     </div>
   )
 }
